@@ -114,6 +114,7 @@ const viewStudents = document.getElementById("viewStudents");
 
 const viewStudentsTbody = document.getElementById("viewStudentsTbody");
 const viewStudentsCount = document.getElementById("viewStudentsCount");
+const viewStudentsEmptyMessage = document.getElementById("viewStudentsEmptyMessage");
 
 //pagination
 const pagination = document.getElementById("pagination");
@@ -132,29 +133,39 @@ if (viewStudents) {
 
     let rows = "";
 
-
-        students.forEach(student => {
-        rows +=    `<tr data-id="${student[0]}">
-                     <td><strong>${student[0]}</strong></td>
-                     <td><strong>${student[1]}</strong></td>
-                     <td>${student[2]}</td>
-                     <td>${student[3]}</td>
-                     <td>${student[4]}</td>
-                     <td>${student[5]}</td>
-                     <td>${student[6]}</td>
+        if (students.length == 0) {
+            rows = `<tr>
+                      <td colspan="7" class="empty-message">no students found in databse</td>
                     </tr>`
-        });
-        viewStudentsTbody.innerHTML = rows;
+            viewStudentsTbody.innerHTML = rows;
+
+            viewStudentsEmptyMessage.textContent = "";
+            pagination.textContent = "";
+            paginationBtns.innerHTML = "";
+        }        
+        else {
+            students.forEach(student => {
+            rows +=    `<tr data-id="${student[0]}">
+                         <td><strong>${student[0]}</strong></td>
+                         <td><strong>${student[1]}</strong></td>
+                         <td>${student[2]}</td>
+                         <td>${student[3]}</td>
+                         <td>${student[4]}</td>
+                         <td>${student[5]}</td>
+                         <td>${student[6]}</td>
+                        </tr>`
+            });
+            viewStudentsTbody.innerHTML = rows;
     
 
-        viewStudentsTbody.addEventListener("click", function(event) {
-            const row = event.target.closest("tr");
-            if (!row) return;
+            viewStudentsTbody.addEventListener("click", function(event) {
+                const row = event.target.closest("tr");
+                if (!row) return;
 
-            const studentId = row.dataset.id;
-            window.location.href = `/student/${studentId}?from=/view_students`;
-        });
-
+                const studentId = row.dataset.id;
+                window.location.href = `/student/${studentId}?from=/view_students`;
+            });
+        }
     };
 
     fetch("/view_students_results", {
@@ -162,7 +173,7 @@ if (viewStudents) {
     })
     .then(response => response.json())
     .then(data => {
-        const students = data.students;
+        const students = data.students;  
         const count = data.count;
         const studentsPerPage = 10;
 
