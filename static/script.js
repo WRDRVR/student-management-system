@@ -189,8 +189,7 @@ if (viewStudents) {
      
             previous.addEventListener("click", () => {
                 if (currentPage == 1) {
-                    previous.disabled;
-                    return 
+                    return previous.disabled;
                 }
                 currentPage-- ;
                 paginate(currentPage, students);
@@ -220,8 +219,7 @@ if (viewStudents) {
 
             next.addEventListener("click", () => {
                 if (currentPage == totalPages) {
-                    next.disabled;
-                    return 
+                    return next.disabled;
                 }
                 currentPage++;
                 paginate(currentPage, students);
@@ -429,8 +427,7 @@ if (searchForm) {
             previous.addEventListener("click", () => {
                 let currentPage = document.getElementById("searchPageNum").dataset.id;
                 if (currentPage == 1) {
-                    previous.disabled;
-                    return 
+                    return previous.disabled;
                 }
                 currentPage-- ;
                 paginate(currentPage, students, params);
@@ -463,8 +460,7 @@ if (searchForm) {
             next.addEventListener("click", () => {
                 let currentPage = document.getElementById("searchPageNum").dataset.id;
                 if (currentPage == totalPages) {
-                    next.disabled;
-                    return 
+                    return next.disabled;
                 }
                 currentPage++;
                 paginate(currentPage, students, params);
