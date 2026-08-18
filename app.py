@@ -102,23 +102,9 @@ app.secret_key = "secret_Key"
 # HOME PAGE
 @app.route("/")
 def home():
-    connection = sqlite3.connect('SMS.db')
-    cursor = connection.cursor()
-
-    cursor.execute("""SELECT COUNT(*) FROM Students""")
-    count = cursor.fetchone()[0]
-
-    cursor.execute("""SELECT AVG(Age) FROM Students""")
-    average = cursor.fetchone()[0]
-    average = round(average, 1)
-
-    cursor.execute("""SELECT MIN(Age) FROM Students""")
-    youngest = cursor.fetchone()[0]
-
-    cursor.execute("""SELECT MAX(Age) FROM Students""")
-    oldest = cursor.fetchone()[0]
     
-    return render_template("HOME.html", count=count, average=average, youngest=youngest, oldest=oldest)
+    return render_template("HOME.html")
+
 
 
 
