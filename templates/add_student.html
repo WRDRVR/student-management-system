@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="eng">
+    <head>
+        <title>Add Student</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+    <body>
+      <header>
+        <div class="headerElements">
+         <button class="sidebarBtn" id="sidebarBtn">≡</button>
+         <div class="logo">S M S</div>
+        </div>
+      </header>
+
+      <div class="sidebar-overlay" id="overlay"></div>
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+         <div class="logo">S M S</div>
+         <button class="close-btn" id="closeBtn">×</button>
+        </div>
+        <nav class="sidebar-menu">
+          <a href="/" class="menu-item">Home</a>
+          <a href="/add_student" class="menu-item">Add student</a>
+          <a href="/view_students"  class="menu-item">All students</a>
+          <a href="/search_student" class="menu-item">Search</a>
+        </nav>
+      </aside>
+      
+      <main>
+        
+
+        
+        <form id ="myForm">
+          <h2>Add a new student</h2>
+
+          <p>please fill the form to add student</p>
+          <p id="addMessage"></p>
+            
+          <div class="main-form">
+              <div class="form-group">
+                <label>Name</label>
+                <input id="name" required type="text" placeholder="Enter name" name="name" >
+              </div>
+
+              <div class="form-group">
+                <label>Age</label>
+                <input id="age" required placeholder="Enter age" name="age" >
+              </div>
+
+              <div class="form-group">
+                <label>Grade</label>
+                <select name="grade">
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                </select>
+              </div>
+            
+              <div class="form-group">
+                <label>Course</label>
+                <select name="course">
+                  <option value="General Science">General Science</option>
+                  <option value="General Arts">General Arts</option>
+                  <option value="Business">Business</option>
+                  <option value="Visual Arts">Visual Arts</option>
+                  <option value="Agric">Agric Studies</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Phone</label>
+                <input id="phone" required type="text" placeholder="Enter phone number" name="phone" >
+              </div>
+
+              <div class="form-group">
+                <label>Email (optional)</label>
+                <input id="email" type="email" placeholder="Enter email" name="email"><br>
+              </div>
+          </div>
+
+              <button class="add-student" type="submit">Add student</button>
+
+        </form>
+        
+      </main>
+
+      <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </body>
+
+</html>

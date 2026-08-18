@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="eng">
+    <head>
+        <title>Student table</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    <body>
+        <header>
+          <div class="headerElements">
+             <button class="sidebarBtn" id="sidebarBtn">≡</button>
+             <div class="logo">S M S</div>
+         </div>
+        </header>
+
+        <div class="sidebar-overlay" id="overlay"></div>
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-header">
+            <div class="logo">S M S</div>
+            <button class="close-btn" id="closeBtn">×</button>
+          </div>
+          <nav class="sidebar-menu">
+            <a href="/" class="menu-item">Home</a>
+            <a href="/add_student" class="menu-item">Add student</a>
+            <a href="/view_students"  class="menu-item">All students</a>
+            <a href="/search_student" class="menu-item">Search</a>
+          </nav>
+        </aside>
+
+      <main>
+
+        <form id="searchForm">
+          <h1>Search Student</h1>
+
+          <p id ="searchMessage">Search for students below</p>
+
+          <div class="search-cluster">
+              <div class="search-input">
+
+                  <input id="name" type="text" placeholder="Enter student name" name="name">                
+                  
+                  <div class="searchBtn-container">
+                    <button class="submit" type="submit">Search</button>
+                    <button type="reset" id="clearBtn">Clear</button>
+                  </div>
+
+              </div><br>
+
+              <div class="select-group">
+
+                  <div>
+                    <label for="grade">Grade</label>
+                    <select name="grade" id="grade">
+                      <option value="">All Grades</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label for="course">Course</label>
+                    <select name="course" id="course">
+                      <option value="">All Course</option>
+                      <option value="General Science">General Science</option>
+                      <option value="General Arts">General Arts</option>
+                      <option value="Business">Business</option>
+                      <option value="Visual Arts">Visual Arts</option>
+                      <option value="Agric">Agric Studies</option>
+                    </select>
+                  </div>
+
+                </div>
+            </div>
+
+          <p id="itemCount"></p>
+
+        </form>
+       
+       
+      
+       <div class="table-container" id="tableContainer">
+         <div class="sort-box">
+           <h2></h2>           
+        
+            <div class="sort-by-box"> 
+                <div>         
+                  <label for="sort-by">Sort by</label>
+                  <select class="sort-by" id="searchSortBy">
+                    <option value="default">Default</option>
+                    <option value="name">Name</option>
+                    <option value="age">Age</option>
+                    <option value="grade">Grade</option>
+                    <option value="course">Course</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label for="sort-by">Order</label>
+                  <select class="sort-by" id="searchSortOrder">
+                    <option value="ASC">Ascending</option>
+                    <option value="DESC">Descending</option>
+                  </select>
+                </div>
+            </div>
+            
+          </div>
+
+        <p class="empty-message">click on student row to view student</p>
+        <table>
+          <thread>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Grade</th>
+              <th>Course</th>
+            </tr>
+          </thread>
+          <tbody id="tableBody">
+          </tbody>
+        </table>
+            <div class="pagination" id="pageNumDiv"></div>
+            <div class="pagination-buttons" id="searchPaginationBtns">
+            </div>
+        </div>
+    
+      </main>
+     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </body>
+</html>

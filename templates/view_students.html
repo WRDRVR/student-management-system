@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="eng">
+    <head>
+        <title>Student table</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+
+    
+    <body>
+        <header>
+          <div class="headerElements">
+             <button class="sidebarBtn" id="sidebarBtn">≡</button>
+             <div class="logo">S M S</div>
+         </div>
+        </header>
+
+        <div class="sidebar-overlay" id="overlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">S M S</div>
+                <button class="close-btn" id="closeBtn">×</button>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/" class="menu-item">Home</a>
+                <a href="/add_student" class="menu-item">Add student</a>
+                <a href="/view_students"  class="menu-item">All students</a>
+                <a href="/search_student" class="menu-item">Search</a>
+            </nav>
+        </aside>
+
+        
+
+   <main>
+    <div class="view-students" id="viewStudents">
+
+        <div class="sort-box">
+           <h2>All Students</h2>           
+        
+            <div class="sort-by-box">       
+
+                <div>
+                    <label for="sort-by">Course</label>
+                    <select class="sort-by" id="">
+                      <option value="">All Course</option>
+                      <option value="General Science">General Science</option>
+                      <option value="General Arts">General Arts</option>
+                      <option value="Business">Business</option>
+                      <option value="Visual Arts">Visual Arts</option>
+                      <option value="Agric">Agric Studies</option>
+                    </select>
+                </div>   
+
+               <div>
+                    <label for="sort-by">Sort by</label>
+                    <select class="sort-by" id="sortBy">
+                        <option value="default">Default</option>
+                        <option value="name">Name</option>
+                        <option value="age">Age</option>
+                        <option value="grade">Grade</option>
+                        <option value="course">Course</option>
+                    </select>
+               </div>
+
+               <div>
+                    <label for="sort-by">Order</label>
+                    <select class="sort-by" id="sortOrder">
+                        <option value="ASC">Ascending</option>
+                        <option value="DESC">Descending</option>
+                    </select>
+               </div>
+            </div>
+            
+        </div>
+
+
+
+           <p class="empty-message">click on student row to view student</p>
+
+
+           <p id="viewStudentsCount"></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Age</th>
+                    <th>Grade</th>
+                    <th>Course</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody id="viewStudentsTbody">
+            </tbody>
+        </table>  
+               <div class="pagination" id="pagination">
+                 </div>
+                 <div class="pagination-buttons" id="paginationBtns"></div> 
+    <div>
+                 
+   </main>
+   
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>Student Management System</title>
+    <meta charset="UTF-8">
+</head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body>
+  <header>
+    <div class="headerElements">
+     <button class="sidebarBtn" id="sidebarBtn">≡</button>
+     <div class="logo">S M S</div>
+    </div>
+  </header>
+
+
+  <div class="sidebar-overlay" id="overlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">S M S</div>
+      <button class="close-btn" id="closeBtn">×</button>
+    </div>
+    <nav class="sidebar-menu">
+      <a href="/" class="menu-item">Home</a>
+      <a href="/add_student" class="menu-item">Add student</a>
+      <a href="/view_students"  class="menu-item">All students</a>
+      <a href="/search_student" class="menu-item">Search</a>
+    </nav>
+  </aside>
+ <main>
+   <section>
+    <h1>Student Management System</h1>
+
+      <P class="passiveText">Please select an option</P>
+   </section>
+
+   <section>
+    <div class="main">
+  
+      <div class="application">
+
+         <a href="/add_student"><button class="mainBtn" id="addStudent">Add Student</button></a> 
+        <a href="/view_students"><button class="mainBtn" id="viewStudents">View Students</button></a>
+         <a href="/search_student"><button class="mainBtn" id="searchStudent">Search Students</button></a>
+
+      </div>
+
+    </div>
+   </section>
+
+   <section>
+    <div class="student-statistics" id="studentStats">
+        <div>
+           <p>Total Students: <strong>{{ count }}</strong></p>
+            <p>Average Age:   <strong>{{ average }}</strong></p>
+            <p>Youngest:      <strong>{{ youngest }}</strong></p>
+            <p>Oldest:        <strong>{{ oldest }}</strong></p>
+        </div>
+
+   </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
