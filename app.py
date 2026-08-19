@@ -1,7 +1,16 @@
 import sqlite3
 from flask import Flask, jsonify, render_template, request
 
-connection = sqlite3.connect('SMS.db')
+
+# GLOBAL DATABASE CONNECTION
+DATABASE = 'SMS.db'
+
+def get_connection():
+    return sqlite3.connect(DATABASE)
+
+
+
+connection = get_connection()
 cursor = connection.cursor()
 
 current_date = '2026/08/18'
@@ -20,6 +29,7 @@ cursor.execute("""
                """)
 
 connection.commit()
+
 
 # HELPERS 
 
@@ -89,7 +99,6 @@ def validate_student(name, age, grade, course, phone, student_id):
 
 
 
-
 #=================================================== FLASK ROUTES =============================================================
 
 
@@ -129,7 +138,7 @@ def add_student_post():
             return jsonify({ "success": False, "field": field, "message": error })
     
     # SQL
-        connection = sqlite3.connect("SMS.db")
+        connection = get_connection()
         cursor = connection.cursor()
         cursor.execute(
           """ INSERT INTO Students (Name, Age, Grade, Course, Phone, Email) VALUES (?, ?, ?, ?, ?, ?) """,
@@ -155,7 +164,8 @@ def view_students():
 
 @app.route("/view_students_results")
 def view_students_results():
-    connection = sqlite3.connect("SMS.db")
+
+    connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(" SELECT * FROM Students ORDER BY ID ")
@@ -185,7 +195,8 @@ def search_student_results():
         course = request.args["course"]
         
         if grade == "" and course == "":
-            connection = sqlite3.connect("SMS.db")
+
+            connection = get_connection()
             cursor = connection.cursor()
 
             name = f"%{name}%"
@@ -195,7 +206,8 @@ def search_student_results():
             return jsonify({ "success": True, "students": students_list, "count": len(students_list) })
         
         elif grade == "" and course != "":
-            connection = sqlite3.connect("SMS.db")
+
+            connection = get_connection()
             cursor = connection.cursor()
 
             name = f"%{name}%"
@@ -206,7 +218,8 @@ def search_student_results():
             return jsonify({ "success": True, "students": students_list, "count": len(students_list) })
         
         elif course == "" and grade != "":
-            connection = sqlite3.connect("SMS.db")
+
+            connection = get_connection()
             cursor = connection.cursor()
 
             name = f"%{name}%"
@@ -224,9 +237,9 @@ def search_student_results():
 
         
     # SQL
-        connection = sqlite3.connect("SMS.db")
+        connection = get_connection()
         cursor = connection.cursor()
-
+        
         name = f"%{name}%"
         grade = f"{grade}"
         course = f"{course}"
@@ -250,7 +263,8 @@ def student_details(student_id):
 
     source = request.args.get("from")
 
-    connection = sqlite3.connect("SMS.db")
+    
+    connection = get_connection()
     cursor = connection.cursor()
 
     cursor.execute(" SELECT * FROM Students WHERE ID = ?", (student_id,))
@@ -271,8 +285,9 @@ def student_details(student_id):
 def update_student_GET_and_POST(student_id):
 
     if request.method == "GET":
-       connection = sqlite3.connect("SMS.db")
+       connection = get_connection()
        cursor = connection.cursor()
+
        cursor.execute("SELECT * FROM Students WHERE ID = ?", (student_id,))
        selected_student =  cursor.fetchone()
 
@@ -293,8 +308,7 @@ def update_student_GET_and_POST(student_id):
             return jsonify({ "success": False, "field": field, "message": error})
 
     # SQL
-
-       connection = sqlite3.connect("SMS.db")
+       connection = get_connection()
        cursor = connection.cursor()
 
        cursor.execute("UPDATE Students SET Name = ?, Age = ?, Grade = ?, Course = ?, Phone = ?, Email = ? WHERE ID = ?", 
@@ -314,10 +328,10 @@ def update_student_GET_and_POST(student_id):
 
 @app.route("/delete_student/<int:student_id>", methods=["DELETE"])
 def delete_student_GET_and_POST(student_id):
-
-
-    connection = sqlite3.connect("SMS.db")
+    
+    connection = get_connection()
     cursor = connection.cursor()
+
     cursor.execute("DELETE FROM Students WHERE ID = ?", (student_id,))
     connection.commit()
 
@@ -325,7 +339,7 @@ def delete_student_GET_and_POST(student_id):
 
 
 
-
-app.run(debug=True)
+if __name__ == "__main__":
+   app.run(debug=True)
 
 
