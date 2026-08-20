@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>Sign-In</title>
+    <meta charset="UTF-8">
+</head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body>
+  <header>
+    <div class="headerElements">
+     <a href="/login">Log-in</a>
+     <div class="logo">S M S</div>
+    </div>
+  </header>
+
+
+ <main>
+    <form id="registerForm">
+    
+        <h3>Sign-In</h3>
+        <p>Register to log-in to SMS</p>
+        <p id="registerMsg"></p>
+
+          <div class="register-form">  
+            <div class="form-group">
+                <label style="font-size: 0.95rem;">Username</label>
+                <input id="username" type="text" name="username">
+                <p id="username_message"></p>
+            </div>
+
+            <div class="form-group">
+                <label style="font-size: 0.95rem;" for="password">Password</label>
+                <input id="password" type="password" name="password">
+                <p id="password_message"></p>
+            </div>
+          </div>
+
+            <button style="margin: 0 auto; min-width: 130px; margin-top: 10px;" class="submit" type="submit">Sign-in</button>
+        
+    </form>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

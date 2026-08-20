@@ -48,9 +48,104 @@ if (overlay && sidebar) {
 
 
 
-// ================================================= HOME ===============================================================
+// ================================================= REGISTER ===============================================================
 
 
+const registerForm = document.getElementById("registerForm");
+const registerMsg = document.getElementById("registerMsg");
+
+if (registerForm) {
+
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+
+    registerForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(registerForm);
+
+        feedbackState(submitBtn, "Registering...")
+
+        
+        fetch("/register_user", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelectorAll(".errorField").forEach(input => {
+            input.classList.remove("errorField");
+            });
+            if (data.success) {
+                registerMsg.classList.add("success");
+                temporaryUIMessage(registerMsg, data.message);
+                registerForm.reset();
+            }
+            else {
+                const message = document.getElementById(data.mfield);
+                const input = document.getElementById(data.field);
+                temporaryUIMessage(message, data.message);
+                input.classList.add("errorField")
+                message.classList.add("error")
+            };
+        })
+        .finally(() => {
+            feedbackStateFinal(submitBtn, "Sign-in");
+        });
+    });
+};
+
+
+
+// =================================================== LOG-IN ==============================================================
+
+
+const loginForm = document.getElementById("loginForm");
+const loginMsg = document.getElementById("loginMsg");
+
+if (loginForm) {
+
+    const submitBtn = document.querySelector("button[type='submit']");
+
+    loginForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(loginForm);
+        feedbackState(submitBtn, "loggin-in...");
+
+        fetch("/login_user", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelectorAll(".errorField").forEach(input => {
+            input.classList.remove("errorField");
+            });
+            if (data.success == true) {
+                loginMsg.classList.add("success");
+                temporaryUIMessage(loginMsg, data.message);
+                loginForm.reset();
+                window.location.href = `/`;
+            }
+            else if (data.success == false) {
+                const message = document.getElementById(data.mfield);
+                const input = document.getElementById(data.field);
+                temporaryUIMessage(message, data.message);
+                input.classList.add("errorField");
+                message.classList.add("error");
+            }
+            else if (data.success == "NOT_FOUND") {
+                temporaryUIMessage(loginMsg, data.message);
+                loginMsg.classList.add("empty-message");
+            }
+        })
+        .finally(() => {
+            feedbackStateFinal(submitBtn, "Log-in")
+        })
+
+    })
+};
 
 
 

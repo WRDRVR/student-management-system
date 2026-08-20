@@ -120,6 +120,14 @@ p {
     margin-left: var(--space-md);
 }
 
+a {
+    color: var(--primary);
+    border-bottom: none;
+}
+a:hover {
+    color: text;
+}
+
 main {
     width: 100%;
     max-width: 1200px;
@@ -148,6 +156,19 @@ main {
 
 /* ================================================= MAIN =========================================================== */
 
+
+
+
+/* ==================================== REGISTER =============================== */
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+}
+#registerForm, #loginForm {
+    margin: 0 auto;
+    max-width: 500px;
+}
 
 
 
@@ -266,6 +287,18 @@ label[for="grade"] {
 label[for="course"] {
     font-size: var(--font-sm);
 }
+
+
+
+
+
+
+
+
+
+/* =================================================== STYLES ==============================================================
+
+
 
 
 /* ================================= 5. SIDEBAR =============================== */
@@ -439,7 +472,6 @@ label[for="course"] {
 /* ---------- Messages ---------- */
 
 .empty-message {
-    padding: 20px;
     text-align: center;
     color: #7f8c8d;
     font-style: italic;
@@ -455,6 +487,10 @@ label[for="course"] {
     margin-bottom: var(--space-lg);
 }
 
+.danger {
+    color: var(--danger-bg);
+    margin-bottom: var(--space-lg);
+}
 .errorField {
     border: 2px solid var(--danger);
     border-radius: var(--radius);

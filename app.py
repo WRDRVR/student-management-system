@@ -1,16 +1,50 @@
 import sqlite3
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+
+
+
+
 
 
 # GLOBAL DATABASE CONNECTION
-DATABASE = 'SMS.db'
+STUDENTS = 'SMS.db'
+USERS = 'USERS.db'
 
-def get_connection():
-    return sqlite3.connect(DATABASE)
+def get_connection(db):
+    return sqlite3.connect(db)
 
 
 
-connection = get_connection()
+
+
+
+# ====================================================== TABLES ===============================================================
+
+
+
+#------------------------------ USERS -----------------------------------
+
+connection = get_connection(USERS)
+cursor = connection.cursor()
+
+cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
+               ID             INTEGER PRIMARY KEY AUTOINCREMENT,
+               Username       VARCHAR(15) UNIQUE NOT NULL,
+               Password_Hash  TEXT NOT NULL,
+               Role           TEXT NOT NULL DEFAULT 'student'
+               )""")
+
+connection.commit()
+
+
+
+
+# --------------------------- STUDENTS ------------------------------------
+
+
+connection = get_connection(STUDENTS)
 cursor = connection.cursor()
 
 current_date = '2026/08/18'
@@ -25,10 +59,12 @@ cursor.execute("""
                Phone      VARCHAR(10) UNIQUE NOT NULL,
                Email      VARCHAR(100) UNIQUE,
                Date       DATE DEFAULT (CURRENT_DATE)
-                )
-               """)
+                )""")
 
 connection.commit()
+
+
+
 
 
 # HELPERS 
@@ -98,25 +134,157 @@ def validate_student(name, age, grade, course, phone, student_id):
             return ("phone", "Phone cannot be empty")
 
 
+def login_required(function):
+    @wraps(function)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            return render_template("not_logged_in.html")
+        return function(*args, **kwargs)
+    return decorated_function
+
+
+
 
 #=================================================== FLASK ROUTES =============================================================
 
 
 
 
+
+
+
 app = Flask(__name__)
-app.secret_key = "secret_Key"
+app.config["SECRET_KEY"] = "development-secret_Key"
+
+
+# -------------------------- SESSIONS ---------------------------
+
+
+
+# ------------------- register --------------------
+
+@app.route("/register")
+def register():
+       return render_template("register.html")
+    
+
+@app.route("/register_user", methods=["POST"])
+def register_user():
+
+        username = request.form.get("username")
+
+        #----------- Verification -----------
+        if username == "":
+            return jsonify({"success": False, "message": "Please enter a valid username", "field": "username", "mfield": "username_message"})
+        if len(username) > 15:
+            return jsonify({"success": False, "message": "Please enter a valid username", "field": "username", "mfield": "username_message"})
+
+        
+        connection = get_connection(USERS)
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM Users WHERE Username = ?", (username,))
+        existing_usernames = cursor.fetchone()
+
+        if existing_usernames:
+            return jsonify({"success": False, "message": "Username already exists, please enter another username", "field": "username", "mfield": "username_message"})
+
+
+        #------------ password ----------------
+        password = request.form.get("password")
+
+        if password == "":
+            return jsonify({"success": False, "message": "Please enter a valid password", "field": "password", "mfield": "password_message"})
+        if len(password) < 6:
+            return jsonify({"success": False, "message": "Password must be at least 6 characters", "field": "password", "mfield": "password_message"})
+
+        password_hash = generate_password_hash(password)
+
+
+        #------------- success ----------------
+        connection = get_connection(USERS)
+        cursor = connection.cursor()
+        cursor.execute("""INSERT INTO Users (Username, Password_hash) VALUES (?, ?)""", (username, password_hash))
+        connection.commit()
+        return jsonify({"success": True, "message": "Registration successful"})
+    
+
+# ------------------- log-in ----------------------
+@app.route("/login")
+def log_in():
+     return render_template("log-in.html")
+
+@app.route("/login_user", methods=["POST"])
+def log_in_user():
+
+        username = request.form.get("username")
+
+        #----------- Verification -----------
+        if username == "":
+            return jsonify({"success": False, "message": "Please enter a valid username", "field": "username", "mfield": "username_message"})
+        if len(username) > 15:
+            return jsonify({"success": False, "message": "Please enter a valid username", "field": "username", "mfield": "username_message"})
+
+
+        #------------ password ----------------
+        password = request.form.get("password")
+
+        if password == "":
+            return jsonify({"success": False, "message": "Please enter a valid password", "field": "password", "mfield": "password_message"})
+        if len(password) < 6:
+            return jsonify({"success": False, "message": "Password must be at least 6 characters", "field": "password", "mfield": "password_message"})
+
+
+        #------------- success ----------------
+        connection = get_connection(USERS)
+        cursor = connection.cursor()
+        cursor.execute("""SELECT * FROM Users WHERE Username = ?""", (username,))
+        found_users = cursor.fetchall()
+ 
+        #-------------- Check if user exists -------------
+
+        if len(found_users) == 0:
+            return jsonify({"success": "NOT_FOUND", "message": "user not found"})
+        
+        #--------------- Check password ----------------
+
+        user = found_users[0]
+        if check_password_hash(user[2], password) == True:
+            session["user_id"] = user[0]
+            return jsonify({"success": True, "message": "Registration successful"})
+        else:
+            return jsonify({"success": False, "message": "Incorrect password", "field": "password", "mfield": "password_message"})
+
+# -------------------- log-out --------------------
+@app.route("/logout")
+def logout():
+    session.pop("user_id", None)
+    return redirect(url_for("log_in"))
+
+
+
+
+
+
+
+# -------------------------------- MAIN APP ----------------------------------
+
+
+
+
 
 
 # HOME PAGE
 @app.route("/")
+@login_required
 def home():
-    return render_template("HOME.html")
+   message = 'Weclome!'
+   return render_template("HOME.html", message=message)
 
 
 
 # ADD STUDENT PAGE
 @app.route("/add_student")
+@login_required
 def add_student():
     return render_template("add_student.html")
 
@@ -138,7 +306,7 @@ def add_student_post():
             return jsonify({ "success": False, "field": field, "message": error })
     
     # SQL
-        connection = get_connection()
+        connection = get_connection(STUDENTS)
         cursor = connection.cursor()
         cursor.execute(
           """ INSERT INTO Students (Name, Age, Grade, Course, Phone, Email) VALUES (?, ?, ?, ?, ?, ?) """,
@@ -153,19 +321,18 @@ def add_student_post():
 
 
 
-
-
 # ============================================== VIEW STUDENT PAGE =======================================================
 
 
 @app.route("/view_students")
+@login_required
 def view_students():
     return render_template("view_students.html")
 
 @app.route("/view_students_results")
 def view_students_results():
 
-    connection = get_connection()
+    connection = get_connection(STUDENTS)
     cursor = connection.cursor()
 
     cursor.execute(" SELECT * FROM Students ORDER BY ID ")
@@ -185,6 +352,7 @@ def view_students_results():
 
 
 @app.route("/search_student")
+@login_required
 def search_student_search():
         return render_template("search_student.html", students=[], count=0)
     
@@ -196,7 +364,7 @@ def search_student_results():
         
         if grade == "" and course == "":
 
-            connection = get_connection()
+            connection = get_connection(STUDENTS)
             cursor = connection.cursor()
 
             name = f"%{name}%"
@@ -207,7 +375,7 @@ def search_student_results():
         
         elif grade == "" and course != "":
 
-            connection = get_connection()
+            connection = get_connection(STUDENTS)
             cursor = connection.cursor()
 
             name = f"%{name}%"
@@ -219,7 +387,7 @@ def search_student_results():
         
         elif course == "" and grade != "":
 
-            connection = get_connection()
+            connection = get_connection(STUDENTS)
             cursor = connection.cursor()
 
             name = f"%{name}%"
@@ -237,7 +405,7 @@ def search_student_results():
 
         
     # SQL
-        connection = get_connection()
+        connection = get_connection(STUDENTS)
         cursor = connection.cursor()
         
         name = f"%{name}%"
@@ -259,12 +427,13 @@ def search_student_results():
 
 
 @app.route("/student/<int:student_id>", methods=["GET"])
+@login_required
 def student_details(student_id):
 
     source = request.args.get("from")
 
     
-    connection = get_connection()
+    connection = get_connection(STUDENTS)
     cursor = connection.cursor()
 
     cursor.execute(" SELECT * FROM Students WHERE ID = ?", (student_id,))
@@ -282,10 +451,11 @@ def student_details(student_id):
 
 
 @app.route("/update_student/<int:student_id>", methods=["GET", "POST"])
+@login_required
 def update_student_GET_and_POST(student_id):
 
     if request.method == "GET":
-       connection = get_connection()
+       connection = get_connection(STUDENTS)
        cursor = connection.cursor()
 
        cursor.execute("SELECT * FROM Students WHERE ID = ?", (student_id,))
@@ -308,7 +478,7 @@ def update_student_GET_and_POST(student_id):
             return jsonify({ "success": False, "field": field, "message": error})
 
     # SQL
-       connection = get_connection()
+       connection = get_connection(STUDENTS)
        cursor = connection.cursor()
 
        cursor.execute("UPDATE Students SET Name = ?, Age = ?, Grade = ?, Course = ?, Phone = ?, Email = ? WHERE ID = ?", 
@@ -327,15 +497,18 @@ def update_student_GET_and_POST(student_id):
 
 
 @app.route("/delete_student/<int:student_id>", methods=["DELETE"])
+@login_required
 def delete_student_GET_and_POST(student_id):
-    
-    connection = get_connection()
+
+    connection = get_connection(STUDENTS)
     cursor = connection.cursor()
 
     cursor.execute("DELETE FROM Students WHERE ID = ?", (student_id,))
     connection.commit()
 
     return jsonify({ "message": "Student has been deleted", "studentId":  student_id })
+
+
 
 
 
