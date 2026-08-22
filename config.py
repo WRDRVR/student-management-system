@@ -1,0 +1,2 @@
+STUDENTS = 'SMS.db'
+USERS = 'USERS.db'

@@ -1,5 +1,6 @@
 SMS.db
 USERS.db
-database.py
+test_database.py
+test.py
 __pycache_/
 *.pyc

@@ -174,7 +174,13 @@ addForm.addEventListener("submit", function(e) {
         method: "POST",
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+         if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
     .then(data => {
         document.querySelectorAll(".errorField").forEach(input => {
             input.classList.remove("errorField");
@@ -753,9 +759,15 @@ if (killSwitch) {
         fetch(`/delete_student/${studentId}`, {
             method: "DELETE",
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
         .then(data => {
-            const studentId = data.studentId;
+            if (!data) return;
             modalOverlay.classList.remove("active");
             window.location.href = source.value
 
