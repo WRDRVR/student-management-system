@@ -2,39 +2,12 @@ from database import get_connection
 from flask import Blueprint, request, session, render_template, jsonify, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import USERS
-from functools import wraps
-
-
-
-def login_required(function):
-    @wraps(function)
-    def decorated_function(*args, **kwargs):
-        if "user_id" not in session:
-            return render_template("not_logged_in.html")
-        return function(*args, **kwargs)
-    return decorated_function
-
-
-def role_required(role):
-    def decorator(function):
-        @wraps(function)
-        def decorated_function(*args, **kwargs):
-            if "user_id" not in session:
-                return redirect(url_for("not_logged_in"))
-            if session["role"] != role:
-                return redirect(url_for("not_authorized"))
-            return function(*args, **kwargs)
-        return decorated_function
-    return decorator    
 
 
 
 
 
-
-
-
-auth = Blueprint("auth", __name__, url_prefix="/auth")
+auth = Blueprint("auth", __name__)
 
 
 @auth.route("/register")
@@ -139,7 +112,7 @@ def log_in_user():
 @auth.route("/logout")
 def logout():
     session.pop("user_id", None)
-    return redirect(url_for("log_in"))
+    return redirect(url_for("auth.log_in"))
 
 
 

@@ -80,6 +80,7 @@ if (registerForm) {
                 registerMsg.classList.add("success");
                 temporaryUIMessage(registerMsg, data.message);
                 registerForm.reset();
+                window.location.href = "/login"
             }
             else {
                 const message = document.getElementById(data.mfield);
@@ -94,6 +95,7 @@ if (registerForm) {
         });
     });
 };
+
 
 
 
@@ -126,7 +128,7 @@ if (loginForm) {
                 loginMsg.classList.add("success");
                 temporaryUIMessage(loginMsg, data.message);
                 loginForm.reset();
-                window.location.href = `/`;
+                window.location.href = `/students`;
             }
             else if (data.success == false) {
                 const message = document.getElementById(data.mfield);
@@ -170,7 +172,7 @@ addForm.addEventListener("submit", function(e) {
 
     feedbackState(submitBtn, "Adding...")
     
-    fetch("/add_student", {
+    fetch("/students/add_student", {
         method: "POST",
         body: formData
     })
@@ -264,12 +266,12 @@ if (viewStudents) {
                 if (!row) return;
 
                 const studentId = row.dataset.id;
-                window.location.href = `/student/${studentId}?from=/view_students`;
+                window.location.href = `/students/student/${studentId}?from=/view_students`;
             });
         }
     };
 
-    fetch("/view_students_results", {
+    fetch("/students/view_students_results", {
         method: "GET"
     })
     .then(response => response.json())
@@ -488,7 +490,7 @@ if (searchForm) {
 
         const studentId = row.dataset.id;
  
-        window.location.href = `/student/${studentId}?from=/search_student`;
+        window.location.href = `/students/student/${studentId}?from=/search_student`;
     });
 
     };
@@ -503,7 +505,7 @@ if (searchForm) {
     const searchFormData = new FormData(searchForm);
     const params = new URLSearchParams(searchFormData);
 
-    fetch(`/search_student_results?${params}`, {
+    fetch(`/students/search_student_results?${params}`, {
         method: "GET",
     })
     .then(response => response.json())
@@ -667,7 +669,7 @@ if (edit) {
 
     edit.addEventListener("click", function() {
         const studentId = edit.dataset.id;
-        window.location.href = `/update_student/${studentId}`;
+        window.location.href = `/students/update_student/${studentId}`;
     });
 
 }
@@ -711,14 +713,14 @@ if (updateForm) {
 
         feedbackState(submitBtn, "Updating...");
         
-        fetch(`/update_student/${studentID}`, {
+        fetch(`/students/update_student/${studentID}`, {
             method: "POST",
             body: updateFormData
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                window.location.href = `/student/${studentID}`;
+                window.location.href = `/students/student/${studentID}`;
                 temporaryUIMessage(updateMessage, data.message);
             }
             else {
@@ -756,7 +758,7 @@ if (killSwitch) {
     killSwitch.addEventListener("click", function() {
         const studentId = killSwitch.dataset.id
 
-        fetch(`/delete_student/${studentId}`, {
+        fetch(`/students/delete_student/${studentId}`, {
             method: "DELETE",
         })
         .then(response => {
