@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>Error Page</title>
+    <meta charset="UTF-8">
+</head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body>
+  <header>
+    <div class="headerElements">
+     <button class="sidebarBtn" id="sidebarBtn">≡</button>
+     <div class="logo">S M S</div>
+    </div>
+  </header>
+
+        <div class="sidebar-overlay" id="overlay"></div>
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-header">
+            <div class="logo">S M S</div>
+            <button class="close-btn" id="closeBtn">×</button>
+          </div>
+          <nav class="sidebar-menu">
+            <a href="/students" class="menu-item">Home</a>
+            <a href="/students/add_student" class="menu-item">Add student</a>
+            <a href="/students/view_students"  class="menu-item">All students</a>
+            <a href="/students/search_student" class="menu-item">Search</a>
+            <a href="/logout" class="menu-item">Logout</a>
+          </nav>
+        </aside>
+
+
+ <main>
+        <h3>Page Not Found</h3>
+        <p>Sorry, the page your are looking cannot be found.</p>
+        <p>Kindly navigate to the <a href="/students">Home</a> page to access features</p>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

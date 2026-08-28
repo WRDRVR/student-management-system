@@ -440,7 +440,6 @@ const searchSortOrder = document.getElementById("searchSortOrder");
 
 
 
-
 if (searchForm) {
 
     function renderStudents(students, count, params) {
@@ -508,7 +507,13 @@ if (searchForm) {
     fetch(`/students/search_student_results?${params}`, {
         method: "GET",
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+            return null;
+        }
+        return response.json()
+    })
     .then(data => {
         const students = data.students;
         const count = data.count;
@@ -771,8 +776,14 @@ if (killSwitch) {
         .then(data => {
             if (!data) return;
             modalOverlay.classList.remove("active");
-            window.location.href = source.value
-
+            const allowedPaths = ["/view_students", "/search_student_results"]
+            const url = new URL(source, window.location.origin);                 
+            if (url.origin == window.location.origin && allowedPaths.includes(url.pathname)) {
+                window.location.href = url.pathname + url.search;
+            }
+            else {
+                window.location.href = "/students"
+            }
         });
     });
 };
