@@ -1,5 +1,7 @@
 SMS.db
 USERS.db
+email_verify.db
+phone_verify.db
 test_database.py
 test.py
 __pycache_/

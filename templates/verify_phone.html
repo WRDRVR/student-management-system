@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>Verify-Phone</title>
+    <meta charset="UTF-8">
+</head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body>
+  <header>
+    <div class="headerElements">
+     <!--<a href="/login">Log-in</a>-->
+     <div class="logo">S M S</div>
+    </div>
+  </header>
+
+  <main>
+
+    <form id="verifyPhoneForm">
+    
+        <h3>Verification</h3>
+        <p id="verifyPhoneMessage">verify the code sent to your phone number</p>
+
+          <div class="register-form">  
+
+            <div class="form-group">
+              <label style="font-size: 0.95rem;">Code</label>
+              <input id="OTP" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" name="code">
+            </div>
+
+          </div>
+          <button style="margin: 0 auto; min-width: 130px; margin-top: 10px;" disabled class="submit" type="submit">submit code</button>
+        
+    </form>
+
+          <div style="display: flex; flex-direction: row; justify-content: space-between;">
+          <button id="resendCode" style="border: none;">Resend Code</button>
+          <p id="timeStamp"></p></div>
+
+
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

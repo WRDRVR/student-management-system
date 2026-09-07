@@ -1,4 +1,4 @@
-import sqlite3
+
 from flask import Blueprint, request, render_template, jsonify, current_app, redirect, url_for
 from helpers import validate_student, login_required, role_required, with_database
 
@@ -25,15 +25,15 @@ def home():
 
 
 @students.route("/add_student")
-#@login_required
-#@role_required("admin" or "teacher")
+@login_required
+@role_required("admin" or "teacher")
 def add_student():
     return render_template("add_student.html")
 
 
 @students.route("/add_student", methods=["POST"])
-#@login_required
-#@role_required("admin" or "teacher")
+@login_required
+@role_required("admin" or "teacher")
 def add_student_post():    
     name = request.form["name"].strip()
     age = request.form["age"].strip()

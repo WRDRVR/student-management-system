@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>Auth-Email</title>
+    <meta charset="UTF-8">
+</head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body>
+  <header>
+    <div class="headerElements">
+     <!--<a href="/login">Log-in</a>-->
+     <div class="logo">S M S</div>
+    </div>
+  </header>
+
+ <main>
+    <p style="color: red;">{{ message }}</p>
+    <form id="authEmailForm">
+    
+        <h3>Registration</h3>
+        <p>Please enter your email</p>
+        <p id="emailMessage"></p>
+
+          <div class="register-form">  
+
+            <div class="form-group">
+              <label style="font-size: 0.95rem;">Email</label>
+              <input id="email" type="email" name="email">
+              <p id="email_message"></p>    
+            </div>
+
+          </div>
+
+          <div id="resendToken">
+          </div>
+        
+            <button style="margin: 0 auto; min-width: 130px; margin-top: 10px;" class="submit" type="submit">submit</button>
+        
+    </form>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

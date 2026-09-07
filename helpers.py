@@ -1,6 +1,9 @@
 import sqlite3
 from functools import wraps
 from flask import redirect, url_for, session, current_app
+import ssl
+import smtplib
+from email.message import EmailMessage
 
 def get_connection(db):
     return sqlite3.connect(db)
@@ -105,7 +108,7 @@ def validate_student(name, age, grade, course, phone, student_id, email):
         elif len(email) > 60:
             return ("email", "Please enter a shorter email")        
 
-def auth_user(username, password, register=True):
+def auth_user(username, password, register=False):
 
     # Username
     if username == "":
@@ -135,6 +138,7 @@ def auth_user(username, password, register=True):
     if len(password) < 6:
         return ("Password must be at least 6 characters", "password", "password_message")
 
+
 def with_database(db, operation, commit=False):
     try:
         connection = sqlite3.connect(current_app.config[db])
@@ -143,11 +147,51 @@ def with_database(db, operation, commit=False):
 
         if commit:
            connection.commit()
-
         return True, result
     
     except sqlite3.Error as error:
+        connection.rollback()
         return False, error
     
     finally:
         connection.close()
+
+def send_verification_email(email, token, id):
+    sender = "biakucaleb@gmail.com"
+    recipient = email
+    password = "ctjm mlyz kijv gtre"
+
+    context = ssl.create_default_context()
+    message = EmailMessage()
+    message['Subject'] = 'SMS SMTP Test'
+    message['From'] = sender
+    message['To'] = recipient
+    message.set_content(f"Dear user, click this link to verify your email on the SMS\n\nhttp://localhost:5000/verify-email?token={token}&id=${id}")
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender, password)
+        server.send_message(message)
+        print("Email sent!") 
+
+def send_verification_sms(phone, code):
+    phone = phone
+    code = code
+    # The rest of the twilio code I could not get because I have been disadvantaged from birth
+    print(f"SMS to {phone}: Your verification code is {code}")
+    return True
+
+def auth_email(email):
+    if email == "":
+        return ("Please enter an email", "email", "email_message")
+    if "@" not in email or ".com" not in email:
+        return ("Please enter a valid email", "email", "email_message")
+    if len(email) < 5:
+        return ("Please enter a valid email", "email", "email_message")
+    if len(email) > 50:
+        return ("Please enter a valid email", "email", "email_message")
+
+def auth_phone(phone):
+    if phone == "":
+        return ("Please enter a phone number", "phone", "phone_message")
+    if len(phone) > 13:
+        return ("Please enter a valid phone number", "phone", "phone_message")

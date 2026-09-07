@@ -1,5 +1,4 @@
 from typing import Literal
-
 from flask import Flask
 import pytest
 import sqlite3

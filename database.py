@@ -8,6 +8,10 @@ def create_USERS(db):
                    ID             INTEGER PRIMARY KEY AUTOINCREMENT,
                    Username       VARCHAR(15) UNIQUE NOT NULL,
                    Password_Hash  TEXT NOT NULL,
+                   Email          TEXT DEFAULT 'None',
+                   EmailVerified  INTEGER DEFAULT '0',
+                   Phone          TEXT DEFAULT 'None',
+                   PhoneVerified  INTEGER DEFAULT '0',
                    Role           TEXT NOT NULL DEFAULT 'student'
                   )""")
     connection.commit()
@@ -31,3 +35,29 @@ def create_STUDENTS(db):
                     )""")
     connection.commit()
     connection.close()
+
+
+def create_email_verify(db):
+    connection = get_connection(db)
+    cursor = connection.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS EmailVerification (
+                       ID  INTEGER PRIMARY KEY,
+                       UserID  INTEGER NOT NULL UNIQUE,
+                       TokenHash  TEXT NOT NULL,
+                       ExpiresAt TEXT NOT NULL,
+                       Attempts  INTEGER NOT NULL DEFAULT 0,
+                       ResendAvailableAt  TEXT NOT NULL
+                   )""")
+       
+
+def create_phone_verify(db):
+    connection = get_connection(db)
+    cursor = connection.cursor()
+    cursor.execute("""CREATE TABLE IF NOT EXISTS PhoneVerification (
+                       ID   INTEGER PRIMARY KEY,
+                       UserID  INTEGER NOT NULL UNIQUE,
+                       CodeHash  TEXT NOT NULL,
+                       ExpiresAt  TEXT NOT NULL,
+                       Attempts   INTEGER NOT NULL DEFAULT 0,
+                       ResendAvailableAt  TEXT NOT NULL
+                   )""")

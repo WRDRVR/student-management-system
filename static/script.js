@@ -71,7 +71,13 @@ if (registerForm) {
             method: "POST",
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
         .then(data => {
             document.querySelectorAll(".errorField").forEach(input => {
             input.classList.remove("errorField");
@@ -79,8 +85,7 @@ if (registerForm) {
             if (data.success) {
                 registerMsg.classList.add("success");
                 temporaryUIMessage(registerMsg, data.message);
-                registerForm.reset();
-                window.location.href = "/login"
+                window.location.href = `/auth-email`
             }
             else {
                 const message = document.getElementById(data.mfield);
@@ -96,6 +101,190 @@ if (registerForm) {
     });
 };
 
+
+// ================================================= AUTH-EMAIL =========================================================
+
+const authEmailForm = document.getElementById("authEmailForm");
+const emailMessage = document.getElementById("emailMessage");
+const resendToken = document.getElementById("resendToken");
+
+if (authEmailForm) {
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    authEmailForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const formData = new FormData(authEmailForm);
+
+        feedbackState(submitBtn, "Submitting...")
+
+        fetch(`/auth-email`, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
+        .then(data => {
+            document.querySelectorAll(".errorField").forEach(input => {
+            input.classList.remove("errorField");
+            });
+            if (data.success) {
+                emailMessage.classList.add("success");
+                temporaryUIMessage(emailMessage, data.message);
+                resendToken.innerHTML = `<a href="/resend-token">Resend Token</a>`;
+                window.location.href = `/auth-phone`;
+            }
+            else {
+                const message = document.getElementById(data.mfield);
+                const input = document.getElementById(data.field);
+                temporaryUIMessage(message, data.message);
+                input.classList.add("errorField")
+                message.classList.add("error")
+            }
+        })
+        .finally(() => {
+            feedbackStateFinal(submitBtn, "Submit");
+        });
+    })
+
+}
+
+
+// ================================================== AUTH-PHONE ==========================================================
+
+const authPhoneForm = document.getElementById("authPhoneForm");
+const phoneMessage = document.getElementById("phoneMessage");
+
+if (authPhoneForm) {
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    authPhoneForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const formData = new FormData(authPhoneForm);
+
+        feedbackState(submitBtn, "Submitting...")
+
+        fetch(`/auth-phone`, { method: "POST", body: formData })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
+        .then(data => {
+            document.querySelectorAll(".errorField").forEach(input => {
+            input.classList.remove("errorField");
+            });
+            if (data.success) {
+                window.location.href = `/verify-phone`
+            }
+            else {
+                const message = document.getElementById(data.mfield);
+                const input = document.getElementById(data.field);
+                temporaryUIMessage(message, data.message);
+                input.classList.add("errorField")
+                message.classList.add("error")
+            }
+        })
+        .finally(() => { feedbackStateFinal(submitBtn, "Submit") });
+    })
+
+    
+}
+
+
+// ================================================ VERIFY-PHONE =========================================================
+
+const verifyPhoneForm = document.getElementById("verifyPhoneForm");
+const verifyPhoneMessage = document.getElementById("verifyPhoneMessage");
+const resendCode = document.getElementById("resendCode");
+const timeStamp = document.getElementById("timeStamp");
+
+if (verifyPhoneForm) {
+    const OTP = document.getElementById("OTP");
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    OTP.addEventListener('input', function(e) {
+        const value = e.target.value;
+        if (value.length === 6) {
+            submitBtn.removeAttribute('disabled');
+        } else {
+            submitBtn.setAttribute('disabled', 'true');
+        }
+    });
+    
+    verifyPhoneForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const formData = new FormData(verifyPhoneForm);
+
+        fetch("/verify-phone", { method: "POST", body: formData})
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
+        .then(data => {
+            if (data.success) {
+                verifyPhoneMessage.classList.add("success");
+                temporaryUIMessage(verifyPhoneMessage, data.message);
+                window.location.href = '/login'
+            } else if (data.success === false) {
+                verifyPhoneMessage.classList.add("error");
+                verifyPhoneMessage.textContent = data.message;
+            } else if (data.success === "Forbidden") {
+                verifyPhoneMessage.classList.add("error")
+                verifyPhoneMessage.textContent = data.message;
+            }
+
+        })
+        .finally(() => { 
+            submitBtn.setAttribute('disabled', 'true');
+            verifyPhoneForm.reset(); 
+        })
+    })
+
+    function startResendTimer(seconds) {
+        resendCode.disabled = true;
+        let remaining = seconds;
+        timeStamp.textContent = `Resend code in ${remaining}`
+
+        const interval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(interval);
+                resendCode.disabled = false;
+                timeStamp.textContent = "";
+                return;
+            }
+            timeStamp.textContent = `Resend code in ${remaining}s`;
+        }, 1000);
+    }
+
+    resendCode.addEventListener("click", ()=> {
+      fetch("/resend-code", { method: "GET" })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
+        .then(data => {
+            if (data.success) {
+               startResendTimer(data.cooldown);
+            } else {
+                temporaryUIMessage(timeStamp, data.message)
+            }
+        })
+    })    
+}
 
 
 
@@ -119,7 +308,13 @@ if (loginForm) {
             method: "POST",
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            return response.json()
+        })
         .then(data => {
             document.querySelectorAll(".errorField").forEach(input => {
             input.classList.remove("errorField");
@@ -274,7 +469,13 @@ if (viewStudents) {
     fetch("/students/view_students_results", {
         method: "GET"
     })
-    .then(response => response.json())
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+            return null;
+        }
+        return response.json()
+    })
     .then(data => {
         const students = data.students;  
         const count = data.count;

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <title>Auth-Phone</title>
+    <meta charset="UTF-8">
+</head>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<body>
+  <header>
+    <div class="headerElements">
+     <!--<a href="/login">Log-in</a>-->
+     <div class="logo">S M S</div>
+    </div>
+  </header>
+
+ <main>
+    <p style="color: red;">{{ message }}</p>
+    <form id="authPhoneForm">
+    
+        <h3>Registration</h3>
+        <p>Please enter your phone number</p>
+        <p id="phoneMessage"></p>
+
+          <div class="register-form">  
+
+            <div class="form-group">
+              <label style="font-size: 0.95rem;">Phone</label>
+              <input id="phone" type="tel" inputmode="tel" name="phone">
+              <p id="phone_message"></p>
+            </div>
+
+          </div>
+        
+            <button style="margin: 0 auto; min-width: 130px; margin-top: 10px;" class="submit" type="submit">submit</button>
+        
+    </form>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

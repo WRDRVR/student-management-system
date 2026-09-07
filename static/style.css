@@ -20,9 +20,12 @@
     --primary-light: #e3f1fd;
 
     /* ----backgrounds---- */
-    --bg: #F8FAFC;
+    --bg: #ffffff;
     --surface:#ffffff;
     --card-bg: rgb(243, 253, 255);
+    
+    /* ----- disabled ----- */
+    --disabled: #ccc;
 
     /* ----text----*/
     --text:#414f64;
@@ -165,11 +168,18 @@ main {
     display: flex;
     flex-direction: column;
 }
-#registerForm, #loginForm {
+#registerForm, #loginForm, #authEmailForm, #authPhoneForm, #verifyPhoneForm {
     margin: 0 auto;
     max-width: 500px;
 }
-
+:disabled{
+    border-color: var(--disabled);
+    color: var(--disabled);
+}
+:disabled:hover {
+    background: none;
+    color: var(--disabled);
+}
 
 
 
