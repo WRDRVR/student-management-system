@@ -1,18 +1,31 @@
 import sqlite3
 from functools import wraps
-from flask import redirect, url_for, session, current_app
-import ssl
-import smtplib
+from flask import redirect, url_for, session, request, current_app
+import ssl, smtplib, time, secrets
 from email.message import EmailMessage
+from pathlib import Path
+
 
 def get_connection(db):
-    return sqlite3.connect(db)
+    base_dir = Path(__file__).resolve().parent
+    db_path = base_dir / db
+    return sqlite3.connect(db_path)
 
 def login_required(function):
     @wraps(function)
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
-            return redirect(url_for("auth.not_logged_in"))
+            return redirect(url_for("auth.not_logged_in")), 302
+        return function(*args, **kwargs)
+    return decorated_function
+
+def not_registered(function):
+    @wraps(function)
+    def decorated_function(*args, **kwargs):
+        if "register_user_id" not in session:
+            if "user_id" in session:
+                return redirect(url_for("auth.not_allowed")), 302
+            return redirect(url_for("auth.not_logged_in")), 403
         return function(*args, **kwargs)
     return decorated_function
 
@@ -21,12 +34,21 @@ def role_required(role):
         @wraps(function)
         def decorated_function(*args, **kwargs):
             if "user_id" not in session:
-                return redirect(url_for("auth.not_logged_in"))
+                return redirect(url_for("auth.not_logged_in")), 302
             if session["role"] != role:
-                return redirect(url_for("auth.not_authorized"))
+                return redirect(url_for("auth.not_authorized")), 403
             return function(*args, **kwargs)
         return decorated_function
     return decorator 
+
+def csrf_required(function):
+    @wraps(function)
+    def decorated_function(*args, **kwargs):
+        csrf_token = request.form.get('csrf_token')
+        if session['csrf_token'] != csrf_token:
+            return redirect(url_for("students.something_went_wrong")), 403
+        return function(*args, *kwargs)
+    return decorated_function
 
 def validate_student(name, age, grade, course, phone, student_id, email):
 
@@ -138,10 +160,9 @@ def auth_user(username, password, register=False):
     if len(password) < 6:
         return ("Password must be at least 6 characters", "password", "password_message")
 
-
 def with_database(db, operation, commit=False):
     try:
-        connection = sqlite3.connect(current_app.config[db])
+        connection = get_connection(current_app.config[db])
         cursor = connection.cursor()
         result = operation(cursor)
 
@@ -156,10 +177,10 @@ def with_database(db, operation, commit=False):
     finally:
         connection.close()
 
-def send_verification_email(email, token, id):
-    sender = "biakucaleb@gmail.com"
+def send_verification_email(email, token):
+    sender = "example@gmail.com"
     recipient = email
-    password = "ctjm mlyz kijv gtre"
+    password = "password"
 
     context = ssl.create_default_context()
     message = EmailMessage()
@@ -176,22 +197,53 @@ def send_verification_email(email, token, id):
 def send_verification_sms(phone, code):
     phone = phone
     code = code
-    # The rest of the twilio code I could not get because I have been disadvantaged from birth
+    #Twilio Code
     print(f"SMS to {phone}: Your verification code is {code}")
     return True
 
 def auth_email(email):
-    if email == "":
+    if email is None:
         return ("Please enter an email", "email", "email_message")
     if "@" not in email or ".com" not in email:
-        return ("Please enter a valid email", "email", "email_message")
+        return ("Your email must be in the valid format (example@gmail.com)", "email", "email_message")
     if len(email) < 5:
         return ("Please enter a valid email", "email", "email_message")
     if len(email) > 50:
-        return ("Please enter a valid email", "email", "email_message")
-
+        return ("Please enter a shorter email", "email", "email_message")
+    
 def auth_phone(phone):
-    if phone == "":
+    if phone is None:
         return ("Please enter a phone number", "phone", "phone_message")
     if len(phone) > 13:
-        return ("Please enter a valid phone number", "phone", "phone_message")
+        return ("Please enter a valid phone number", "phone", "phone_message") 
+       
+def rate_limit(client, rate_limits):
+    current_time = time.time()
+
+    if client not in rate_limits:
+        rate_limits[client] = {
+            "start": current_time,
+            "requests": 1
+        }
+        return True
+    
+    elapsed = current_time - rate_limits[client]["start"]
+
+
+    if elapsed >= 60:
+        rate_limits[client] = {
+            "start": current_time,
+            "requests": 1
+        }
+        return True
+
+    if rate_limits[client]["requests"] >= 5:
+        return False
+
+    rate_limits[client]["requests"] += 1
+    return True    
+
+def csrf():
+    csrf_token = secrets.token_urlsafe(32)
+    session["csrf_token"] = csrf_token
+    return csrf_token 

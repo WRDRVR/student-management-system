@@ -1,5 +1,7 @@
+import os
+
 class Config:
-    SECRET_KEY = "development-secret_Key"
+    SECRET_KEY = os.environ.get("SECRET_KEY")
     USERS_DB = "USERS.db"
     STUDENTS_DB = "SMS.db"
     EMAIL_VER = "email_verify.db"

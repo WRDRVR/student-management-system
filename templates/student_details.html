@@ -11,6 +11,7 @@
           <div class="headerElements">
              <button class="sidebarBtn" id="sidebarBtn">≡</button>
              <div class="logo">S M S</div>
+             <div class="profile"><img src="images/user.jpg"> Profile</div>
          </div>
         </header>
         
@@ -74,8 +75,11 @@
                       <p>Are you sure you want to delete this student?</p><br>
                       <p><strong>{{ student[1] }}</strong> from <strong>{{ student[3] }}</strong></p>
                       <div class="button-container">
-                          <button data-id="{{ student[0] }}" class="delete" id="killSwitch">Delete</button>
-                          <button data-id="{{ student[0] }}" class="cancel" id="cancel">Cancel</button>
+                          <form id="killSwitch">
+                            <input hidden name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" data-id="{{ student[0] }}" class="delete" >Delete</button>
+                          </form>
+                          <button type="button" data-id="{{ student[0] }}" class="cancel" id="cancel">Cancel</button>
                       </div>
 
                     </div>

@@ -110,6 +110,10 @@ header {
     align-items: center;
 }
 
+.profile {
+    cursor: pointer;
+}
+
 h1,h2,h3 {
     color: var(--text);
     margin-bottom: var(--space-lg);
@@ -179,6 +183,14 @@ main {
 :disabled:hover {
     background: none;
     color: var(--disabled);
+}
+.Resend-code-button {
+    border: none;
+    padding: var(--space-xxs);
+    max-height: fit-content;
+}
+.Resend-code-button:hover {
+    background: none;
 }
 
 

@@ -10,6 +10,7 @@
         <div class="headerElements">
          <button class="sidebarBtn" id="sidebarBtn">≡</button>
          <div class="logo">S M S</div>
+         <div class="profile"><img src="images/user.jpg"> Profile</div>
         </div>
       </header>
 
@@ -78,6 +79,7 @@
                 <label>Email (optional)</label>
                 <input id="email" type="email" placeholder="Enter email" name="email"><br>
               </div>
+              <input hidden name="csrf_token" value="{{ csrf_token }}">
           </div>
 
               <button class="add-student" type="submit">Add student</button>

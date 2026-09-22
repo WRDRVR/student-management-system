@@ -1,12 +1,11 @@
 from helpers import get_connection
-from flask import current_app
 
 def create_USERS(db):
     connection = get_connection(db)
     cursor = connection.cursor()
     cursor.execute("""CREATE TABLE IF NOT EXISTS Users (
                    ID             INTEGER PRIMARY KEY AUTOINCREMENT,
-                   Username       VARCHAR(15) UNIQUE NOT NULL,
+                   Username       VARCHAR(20) UNIQUE NOT NULL,
                    Password_Hash  TEXT NOT NULL,
                    Email          TEXT DEFAULT 'None',
                    EmailVerified  INTEGER DEFAULT '0',
@@ -21,7 +20,7 @@ def create_USERS(db):
 def create_STUDENTS(db):
     connection = get_connection(db)
     cursor = connection.cursor()
-    current_date = '2026/08/28'
+    current_date = '2026/09/22'
     cursor.execute("""
                    CREATE TABLE IF NOT EXISTS Students(
                    ID         INTEGER PRIMARY KEY AUTOINCREMENT,

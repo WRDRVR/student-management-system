@@ -1,6 +1,6 @@
 
-from flask import Blueprint, request, render_template, jsonify, current_app, redirect, url_for
-from helpers import validate_student, login_required, role_required, with_database
+from flask import Blueprint, request, render_template, jsonify, redirect, url_for,session
+from helpers import validate_student, login_required, role_required, with_database, csrf_required, csrf
 
 
 
@@ -28,12 +28,14 @@ def home():
 @login_required
 @role_required("admin" or "teacher")
 def add_student():
-    return render_template("add_student.html")
+    csrf_token = csrf()
+    return render_template("add_student.html", csrf_token = csrf_token)
 
 
 @students.route("/add_student", methods=["POST"])
 @login_required
 @role_required("admin" or "teacher")
+@csrf_required
 def add_student_post():    
     name = request.form["name"].strip()
     age = request.form["age"].strip()
@@ -57,7 +59,7 @@ def add_student_post():
     success, result = with_database("STUDENTS_DB", insert_student, commit=True)
     if not success:
         print(result)
-        return redirect(url_for("students.something_went_wrong"))
+        return redirect(url_for("students.something_went_wrong")), 302
 
     return jsonify({"success": True, "message": "Student added successfully"})
 
@@ -78,7 +80,7 @@ def view_students_results():
     success, result = with_database("STUDENTS_DB", fetch_students)
     if not success:
         print(result)
-        return redirect(url_for('students.something_went_wrong'))
+        return redirect(url_for('students.something_went_wrong')), 302
     
     students_list = result
     count = len(students_list)
@@ -122,7 +124,7 @@ def search_student_results():
 
     if not success:
         print(result)
-        return redirect(url_for("students.something_went_wrong"))
+        return redirect(url_for("students.something_went_wrong")), 302
     
     students_list = result
     return jsonify({ "success": True, "students": students_list, "count": len(students_list) })
@@ -141,10 +143,10 @@ def student_details(student_id):
     elif source.startswith("/search_student_results"):
         source = source
     else:
-        redirect(url_for("students.home"))
+        redirect(url_for("students.home")), 403
 
     if student_id > 1000 or student_id < 1:
-        return redirect(url_for("students.page_not_found"))
+        return redirect(url_for("students.page_not_found")), 404
     
     # SQL
     def select_student(cursor):
@@ -153,86 +155,89 @@ def student_details(student_id):
     success, result = with_database("STUDENTS_DB", select_student)
     if not success:
         print(result)
-        return redirect(url_for("students.something_went_wrong"))
+        return redirect(url_for("students.something_went_wrong")), 302
     student = result
 
     if student:
-        return render_template("student_details.html", student=student, source=source)
+        csrf_token = csrf()
+        return render_template("student_details.html", student=student, source=source, csrf_token=csrf_token)
     else:
-        return redirect(url_for("students.page_not_found"))
+        return redirect(url_for("students.page_not_found")), 404
+
+
+
+@students.route("/update_student/<int:student_id>")
+def update_student_GET(student_id):
+    if student_id > 1000 or student_id < 1:
+        return redirect(url_for("students.page_not_found")), 404
+
+    # SQL
+    def get_students(cursor):
+        cursor.execute("SELECT * FROM Students WHERE ID = ?", (student_id,))
+        return cursor.fetchone()
+    success, result = with_database("STUDENTS_DB", get_students)
+    if not success:
+        print(result)
+        return redirect(url_for("students.something_went_wrong")), 302
         
+    selected_student = result
+    if selected_student:
+        csrf_token = csrf()
+        return render_template("update_student.html", student=selected_student, csrf_token=csrf_token)
+    else:
+        return redirect(url_for("students.page_not_found")), 404
 
-
-@students.route("/update_student/<int:student_id>", methods=["GET", "POST"])
+@students.route("/update_student/<int:student_id>", methods=["POST"])
 @login_required
 @role_required("admin" or "teacher")
-def update_student_GET_and_POST(student_id):
-    if request.method == "GET":
-        if student_id > 1000 or student_id < 1:
-            return redirect(url_for("students.page_not_found"))
-
-        # SQL
-        def get_students(cursor):
-            cursor.execute("SELECT * FROM Students WHERE ID = ?", (student_id,))
-            return cursor.fetchone()
-        success, result = with_database("STUDENTS_DB", get_students)
-        if not success:
-            print(result)
-            return redirect(url_for("students.something_went_wrong"))
+@csrf_required
+def update_student_POST(student_id):
+    if student_id > 1000 or student_id < 1:
+        return redirect(url_for("students.page_not_found")), 404
         
-        selected_student = result
-        if selected_student:
-            return render_template("update_student.html", student=selected_student)
-        else:
-            return redirect(url_for("students.page_not_found"))
-  
-    elif request.method == "POST":
-        if student_id > 1000 or student_id < 1:
-            return redirect(url_for("students.page_not_found"))
+    #CHECK IF STUDENT EXISTS
+    def check_student(cursor):
+        cursor.execute("SELECT * FROM Students WHERE ID = ?", (student_id))
+        return cursor.fetchone()
+    success, result = with_database("STUDENTS_DB", check_student)
+    if not success:
+        print(result)
+        return redirect(url_for("students.something_went_wrong")), 302
+    student = result
+    if not student:
+        return redirect(url_for("students.page_not_found")), 302
+
+    name = request.form["name"].strip()
+    age = request.form["age"].strip()
+    grade = request.form["grade"].strip() 
+    course = request.form["course"].strip()
+    phone = request.form["phone"]
+    email = request.form.get("email", "")  
+
+    # Validation
+    result = validate_student(name, age, grade, course, phone, student_id, email)
+    if result:
+        field, error = result
+        return jsonify({ "success": False, "field": field, "message": error})
+
+    # SQL
+    def update_student(cursor):
+        cursor.execute("UPDATE Students SET Name = ?, Age = ?, Grade = ?, Course = ?, Phone = ?, Email = ? WHERE ID = ?", 
+        (name, age, grade, course, phone, email, student_id))
+    success, result = with_database("STUDENT_DB", update_student, commit=True)
+    if not success:
+        print(result)
+        return redirect(url_for("students.something_went_wrong")), 302
         
-        #CHECK IF STUDENT EXISTS
-        def check_student(cursor):
-            cursor.execute("SELECT * FROM Students WHERE ID = ?", (student_id))
-            return cursor.fetchone()
-        success, result = with_database("STUDENTS_DB", check_student)
-        if not success:
-            print(result)
-            return redirect(url_for("students.something_went_wrong"))
-        student = result
-        if not student:
-            return redirect(url_for("students.page_not_found"))
-
-        name = request.form["name"].strip()
-        age = request.form["age"].strip()
-        grade = request.form["grade"].strip() 
-        course = request.form["course"].strip()
-        phone = request.form["phone"]
-        email = request.form.get("email", "")  
-
-        # Validation
-        result = validate_student(name, age, grade, course, phone, student_id, email)
-        if result:
-            field, error = result
-            return jsonify({ "success": False, "field": field, "message": error})
-
-        # SQL
-        def update_student(cursor):
-            cursor.execute("UPDATE Students SET Name = ?, Age = ?, Grade = ?, Course = ?, Phone = ?, Email = ? WHERE ID = ?", 
-            (name, age, grade, course, phone, email, student_id))
-        success, result = with_database("STUDENT_DB", update_student, commit=True)
-        if not success:
-            print(result)
-            return redirect(url_for("students.something_went_wrong"))
-        
-        return jsonify({ "success": True, "message": "Student has been updated" })
+    return jsonify({ "success": True, "message": "Student has been updated" })
 
 
 
 @students.route("/delete_student/<int:student_id>", methods=["DELETE"])
 @login_required
 @role_required("admin")
+@csrf_required
 def delete_student_GET_and_POST(student_id):
-
     if student_id > 1000 or student_id < 1:
         return redirect(url_for("students.page_not_found"))
     
@@ -257,3 +262,18 @@ def delete_student_GET_and_POST(student_id):
     return jsonify({ "message": "Student has been deleted", "studentId":  student_id })
 
 
+
+@students.route("/profile")
+@login_required
+def profile():
+    user_id = session.get("user_id")
+
+    def get_user(cursor):
+        cursor.execute("SELECT * FROM Users WHERE ID = ?", (user_id,))
+        return cursor.fetchone()
+    success, result = with_database("USERS_DB", get_user)
+    if not success:
+        print(result)
+        return redirect(url_for("students.something_went_wrong")), 302
+    user = result
+    return render_template("profile_test.html", user=user)

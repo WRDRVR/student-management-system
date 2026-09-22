@@ -9,7 +9,7 @@
 <body>
   <header>
     <div class="headerElements">
-     <!--<a href="/login">Log-in</a>-->
+     <a href="/login">Log-in</a>
      <div class="logo">S M S</div>
     </div>
   </header>
@@ -23,6 +23,7 @@
         <p id="emailMessage"></p>
 
           <div class="register-form">  
+            <input hidden name="csrf_token" value="{{ csrf_token }}"  
 
             <div class="form-group">
               <label style="font-size: 0.95rem;">Email</label>

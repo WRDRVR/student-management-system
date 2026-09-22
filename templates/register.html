@@ -23,6 +23,8 @@
         <p id="registerMsg">{{ message }}</p>
 
           <div class="register-form">  
+            <input hidden name="csrf_token" value="{{ csrf_token }}">
+
             <div class="form-group">
                 <label style="font-size: 0.95rem;">Username</label>
                 <input required id="username" type="text" name="username">

@@ -46,6 +46,7 @@ if (overlay && sidebar) {
     });
 };
 
+// ================================================== Profile =========================================
 
 
 // ================================================= REGISTER ===============================================================
@@ -90,7 +91,7 @@ if (registerForm) {
             else {
                 const message = document.getElementById(data.mfield);
                 const input = document.getElementById(data.field);
-                temporaryUIMessage(message, data.message);
+                message.textContent = data.message;
                 input.classList.add("errorField")
                 message.classList.add("error")
             };
@@ -141,7 +142,7 @@ if (authEmailForm) {
             else {
                 const message = document.getElementById(data.mfield);
                 const input = document.getElementById(data.field);
-                temporaryUIMessage(message, data.message);
+                message.textContent = data.message;
                 input.classList.add("errorField")
                 message.classList.add("error")
             }
@@ -186,7 +187,7 @@ if (authPhoneForm) {
             else {
                 const message = document.getElementById(data.mfield);
                 const input = document.getElementById(data.field);
-                temporaryUIMessage(message, data.message);
+                message.textContent = data.message;
                 input.classList.add("errorField")
                 message.classList.add("error")
             }
@@ -312,6 +313,10 @@ if (loginForm) {
             if (response.redirected) {
                 window.location.href = response.url;
                 return null;
+            }            
+            if (response.status === 429) {
+                submitBtn.disabled = true;
+                return;
             }
             return response.json()
         })
@@ -335,6 +340,11 @@ if (loginForm) {
             else if (data.success == "NOT_FOUND") {
                 temporaryUIMessage(loginMsg, data.message);
                 loginMsg.classList.add("empty-message");
+            }
+            else if (data.success == "FORBIDDEN") {
+                loginMsg.textContent = data.message;
+                loginMsg.classList.add("empty-message");
+                submitBtn.setAttribute('disabled', 'true')
             }
         })
         .finally(() => {
@@ -961,11 +971,15 @@ const source = document.getElementById("source");
 if (killSwitch) {
     
 
-    killSwitch.addEventListener("click", function() {
+    killSwitch.addEventListener("click", function(e) {
+        e.preventDefault()
+
         const studentId = killSwitch.dataset.id
+        formData = new FormData(killSwitch)
 
         fetch(`/students/delete_student/${studentId}`, {
             method: "DELETE",
+            body: formData
         })
         .then(response => {
             if (response.redirected) {
