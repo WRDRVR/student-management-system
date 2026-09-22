@@ -3,6 +3,8 @@ USERS.db
 email_verify.db
 phone_verify.db
 test_database.py
+test_email_verify.db
+test_phone_verify.db
 test.py
 __pycache_/
 *.pyc
