@@ -21,7 +21,7 @@ def something_went_wrong():
 @students.route("/")
 @login_required
 def home():
-   return render_template("HOME.html")
+   return render_template("home.html")
 
 
 @students.route("/add_student")
